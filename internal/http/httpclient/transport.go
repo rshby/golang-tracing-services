@@ -23,7 +23,7 @@ func NewTransport() http.RoundTripper {
 }
 
 func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
-	ctx, span := otel.Start(r.Context())
+	ctx, span := otel.Start(r.Context(), "", "HTTP")
 	defer span.End()
 
 	// inject traceID to header
