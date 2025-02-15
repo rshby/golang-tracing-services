@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/codes"
 	"golang-tracing-services/internal/config"
+	"golang-tracing-services/internal/drivers/logger"
 	"golang-tracing-services/internal/http/httpclient"
 	"golang-tracing-services/internal/http/middleware"
 	"golang-tracing-services/internal/router"
@@ -20,6 +21,8 @@ import (
 )
 
 func main() {
+	logger.SetupLogger()
+	
 	shutdownTraceProvider := otel.NewTraceProvider(context.Background())
 	defer shutdownTraceProvider()
 

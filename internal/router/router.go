@@ -31,7 +31,7 @@ func (r *Router) ApiV1(app *gin.RouterGroup) {
 	{
 		orderV1Group := v1Group.Group("/order")
 		{
-			orderV1Group.POST("/", r.orderController.Create)
+			orderV1Group.POST("", r.orderController.Create)
 		}
 	}
 }

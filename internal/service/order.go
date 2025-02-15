@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/trace"
 	"golang-tracing-services/internal/entity"
 	"golang-tracing-services/internal/http/httpservices/customer"
 	customerDto "golang-tracing-services/internal/http/httpservices/customer/dto"
 	"golang-tracing-services/internal/http/httpservices/product"
 	otel "golang-tracing-services/tracing"
-	"log"
 	"sync"
 )
 
@@ -31,6 +31,8 @@ func (o *orderService) CreateOrder(ctx context.Context, request entity.CreateOrd
 	ctx, span := otel.Start(ctx)
 	defer span.End()
 
+	logger := logrus.WithContext(ctx)
+
 	var (
 		wg               = &sync.WaitGroup{}
 		chanErr          = make(chan error, 2)
@@ -49,6 +51,7 @@ func (o *orderService) CreateOrder(ctx context.Context, request entity.CreateOrd
 		var err error
 		existingCustomer, err = o.customerHttpService.GetCustomerByEmail(ctx, request.Email)
 		if err != nil {
+			logger.Error(err)
 			span.RecordError(err)
 			chanErr <- err
 		}
@@ -66,6 +69,7 @@ func (o *orderService) CreateOrder(ctx context.Context, request entity.CreateOrd
 
 		_, err = o.productHttpService.GetProductByID(ctx, 8)
 		if err != nil {
+			logger.Error(err)
 			span.RecordError(err)
 			chanErr <- err
 			return
@@ -76,11 +80,12 @@ func (o *orderService) CreateOrder(ctx context.Context, request entity.CreateOrd
 	close(chanErr)
 	for err := range chanErr {
 		if err != nil {
+			logger.Error(err)
 			span.RecordError(err)
 			return err
 		}
 	}
 
-	log.Print(existingCustomer)
+	logger.Infof("success create order : %v", existingCustomer)
 	return nil
 }
